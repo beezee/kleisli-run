@@ -3,8 +3,8 @@ require 'ostruct'
 
 module Kleisli
 
-  def self.run(&block)
-    r = Runner.new(block.binding)
+  def self.run(runner_impl = Runner, &block)
+    r = runner_impl.new(block.binding)
     begin
       res = r.instance_eval(&block)
       r.start.fmap { res }
@@ -26,9 +26,17 @@ module Kleisli
     def extract(val, m)
       called = false
       @start = m unless @start
-      m >-> i { called = true; @struct.send("#{val}=".to_sym, i) }
+      m >-> i { called = true; set_value(val, i) }
       raise MonadTerminator.new(m) unless called
-      @struct.send(val)
+      get_value(val)
+    end
+
+    def set_value(k, v)
+      @struct.send("#{k}=".to_sym, v)
+    end
+
+    def get_value(k)
+      @struct.send(k)
     end
 
     def method_missing(m, *args)
@@ -39,10 +47,26 @@ module Kleisli
         return extract(m, args.first[:from])
       end
       if args.empty?
-        @struct.send(m)
+        get_value(m)
       else
-        @struct.send("#{m}=".to_sym, args.first)
+        set_value(m, args.first)
       end
+    end
+  end
+
+  class HashRunner < Runner
+
+    def initialize(block_binding)
+      super(block_binding)
+      @hash = {}
+    end
+
+    def set_value(k, v)
+      @hash[k] = v
+    end
+
+    def get_value(k)
+      @hash[k]
     end
   end
 
