@@ -2,8 +2,8 @@ require "kleisli/run/version"
 
 module Kleisli
 
-  def self.run(runner_impl = Runner, &block)
-    r = runner_impl.new(block.binding)
+  def self.run(&block)
+    r = Runner.new(block.binding)
     begin
       res = r.instance_eval(&block)
       r.start.fmap { res }
