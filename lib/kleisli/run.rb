@@ -39,16 +39,17 @@ module Kleisli
     end
 
     def method_missing(m, *args)
-      if @o_self.respond_to?(m)
-        return @o_self.send(m, *args)
-      end
-      if args.first.kind_of?(Hash) && args.first[:from] && args.size == 1
-        return extract(m, args.first[:from])
-      end
-      if args.empty?
+      case
+      when @o_self.respond_to?(m)
+        @o_self.send(m, *args)
+      when args.first.kind_of?(Hash) && args.first[:from] && args.size == 1
+        extract(m, args.first[:from])
+      when args.empty?
         get_value(m)
-      else
+      when m.to_s =~ /\=$/
         set_value(m, args.first)
+      else
+        @o_self.send(m, *args)
       end
     end
   end
