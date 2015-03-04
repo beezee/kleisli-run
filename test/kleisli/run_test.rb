@@ -96,5 +96,4 @@ class RunTest < Minitest::Test
     end
     assert(Success(10), s)
   end
-
 end
