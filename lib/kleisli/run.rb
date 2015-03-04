@@ -1,5 +1,4 @@
 require "kleisli/run/version"
-require 'ostruct'
 
 module Kleisli
 
@@ -17,7 +16,7 @@ module Kleisli
     attr_reader :start
 
     def initialize(block_binding)
-      @struct = OpenStruct.new
+      @hash = {}
       @stopped = false
       @start = false
       @o_self = block_binding.eval('self')
@@ -32,11 +31,11 @@ module Kleisli
     end
 
     def set_value(k, v)
-      @struct.send("#{k}=".to_sym, v)
+      @hash[k] = v
     end
 
     def get_value(k)
-      @struct.send(k)
+      @hash[k]
     end
 
     def method_missing(m, *args)
@@ -51,22 +50,6 @@ module Kleisli
       else
         set_value(m, args.first)
       end
-    end
-  end
-
-  class HashRunner < Runner
-
-    def initialize(block_binding)
-      super(block_binding)
-      @hash = {}
-    end
-
-    def set_value(k, v)
-      @hash[k] = v
-    end
-
-    def get_value(k)
-      @hash[k]
     end
   end
 

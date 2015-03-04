@@ -97,35 +97,4 @@ class RunTest < Minitest::Test
     end
     assert(Success(10), s)
   end
-
-  def test_perf_hash_vs_ostruct
-    iterations = 100000
-    ht = Benchmark.measure do
-      iterations.times do
-        Kleisli.run(Kleisli::HashRunner) do
-          a = Success(1)
-          b = Success(2)
-          c = Success(3)
-          d from: Success(-> x, y, z { x + y + z }) * a * b * c
-          e = sums(d, 4)
-        end
-      end
-    end
-
-    ost = Benchmark.measure do
-      iterations.times do
-        Kleisli.run do
-          a = Success(1)
-          b = Success(2)
-          c = Success(3)
-          d from: Success(-> x, y, z { x + y + z }) * a * b * c
-          e = sums(d, 4)
-        end
-      end
-    end
-
-    puts ht
-    puts ost
-  end
-
 end
